@@ -110,10 +110,9 @@ export function ProposalEditor({
       {/* --- Column 1: Context (Job Details, Score, Analysis) --- */}
       <div className="lg:col-span-1 space-y-6">
         <Tabs defaultValue="details">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="details">Details</TabsTrigger>
             <TabsTrigger value="analysis">Analysis</TabsTrigger>
-            <TabsTrigger value="score">Score</TabsTrigger>
           </TabsList>
           
           {/* Job Details Tab */}
@@ -132,7 +131,7 @@ export function ProposalEditor({
 
           {/* AI Analysis Tab */}
           <TabsContent value="analysis">
-            <Card className="mt-4">
+            <Card className="mt-4 space-y-4">
               <CardHeader>
                 <CardTitle>AI Analysis</CardTitle>
               </CardHeader>
@@ -153,10 +152,6 @@ export function ProposalEditor({
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-
-          {/* Match Score Tab */}
-          <TabsContent value="score">
             <Card className="mt-4">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">

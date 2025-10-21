@@ -12,7 +12,7 @@ const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
   apiKey: process.env.OPENROUTER_API_KEY,
   defaultHeaders: {
-    "HTTP-Referer": "http://localhost:3000", // Change to your site URL in production
+    "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL, // Change to your site URL in production
     "X-Title": "ProBid AI", // Optional: Your app name
   },
 });

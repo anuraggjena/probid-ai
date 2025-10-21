@@ -7,36 +7,38 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Loader2, Save, Upload } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { portfolios } from "@/db/schema"; // Import the type
+import { Loader2, Save } from "lucide-react";
+import { Label } from "@/components/ui/label"; // Keep Label
 
-// Define the type
-type Portfolio = typeof portfolios.$inferSelect;
+// Define a simpler type just for the data we fetch/use
+interface PortfolioData {
+  parsedText: string | null;
+}
 
 export default function PortfolioPage() {
   const [text, setText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isFetching, setIsFetching] = useState(true); // For initial load
+  const [isFetching, setIsFetching] = useState(true);
 
   // --- Fetch existing portfolio text ---
   useEffect(() => {
     const fetchPortfolio = async () => {
       setIsFetching(true);
       try {
-        // We'll create this GET API route next
-        const response = await fetch("/api/portfolio");
+        const response = await fetch("/api/portfolio"); // GET request
         if (response.ok) {
-          const data = (await response.json()) as Portfolio;
-          if (data && data.parsedText) {
-            setText(data.parsedText);
-          }
+          const data = (await response.json()) as PortfolioData;
+          setText(data.parsedText || ""); // Set text or empty string
+        } else {
+           // Handle non-404 errors during fetch
+           if(response.status !== 404) throw new Error(`Failed with status: ${response.status}`);
+           // If 404 (not found), just leave text empty
         }
       } catch (error) {
         console.error("Failed to fetch portfolio", error);
@@ -50,23 +52,23 @@ export default function PortfolioPage() {
   }, []);
 
   // --- Handle saving the text ---
-  const handleSave = async () => {
+  const handleSaveText = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/portfolio", {
+      const response = await fetch("/api/portfolio", { // POST request
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ parsedText: text }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to save portfolio");
+        throw new Error("Failed to save portfolio text");
       }
 
       toast.success("Portfolio saved successfully!");
     } catch (error) {
       console.error(error);
-      toast.error("Something went wrong. Please try again.");
+      toast.error("Something went wrong saving text. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -77,56 +79,34 @@ export default function PortfolioPage() {
       <CardHeader>
         <CardTitle>Your Portfolio / Resume</CardTitle>
         <CardDescription>
-          Provide your resume/portfolio content. The AI will use
-          this to find relevant experience for your proposals.
+          Paste your full resume, skills, portfolio content, or bio below. The AI will use this text to find your most relevant experience.
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="paste">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="paste">Paste Text</TabsTrigger>
-            <TabsTrigger value="upload" disabled>
-              Upload File (Coming Soon)
-            </TabsTrigger>
-          </TabsList>
-          
-          {/* --- Tab 1: Paste Text --- */}
-          <TabsContent value="paste">
-            <Textarea
-              placeholder={
-                isFetching
-                  ? "Loading existing portfolio..."
-                  : "Paste your resume here..."
-              }
-              className="min-h-[400px] text-base mt-4"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              disabled={isFetching}
-            />
-            <Button
-              onClick={handleSave}
-              disabled={isLoading || isFetching}
-              className="mt-4"
-            >
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <Save className="mr-2 h-4 w-4" />
-              Save Text
-            </Button>
-          </TabsContent>
-
-          {/* --- Tab 2: Upload File (Disabled) --- */}
-          <TabsContent value="upload">
-            <Alert className="mt-4">
-              <Upload className="h-4 w-4" />
-              <AlertTitle>Coming Soon!</AlertTitle>
-              <AlertDescription>
-                File uploads for PDF and DOCX files will be enabled after the
-                project is deployed.
-              </AlertDescription>
-            </Alert>
-          </TabsContent>
-        </Tabs>
+      <CardContent className="space-y-2">
+        <Label htmlFor="paste-area">Portfolio Content (Used for Analysis)</Label>
+        <Textarea
+          id="paste-area"
+          placeholder={
+            isFetching
+              ? "Loading existing portfolio..."
+              : "Paste your resume here..."
+          }
+          className="min-h-[400px] text-base"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          disabled={isFetching}
+        />
       </CardContent>
+      <CardFooter className="border-t px-6 py-4">
+        <Button
+          onClick={handleSaveText}
+          disabled={isLoading || isFetching}
+        >
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          <Save className="mr-2 h-4 w-4" />
+          Save Portfolio
+        </Button>
+      </CardFooter>
     </Card>
   );
 }

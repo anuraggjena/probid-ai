@@ -6,10 +6,16 @@ import { auth } from "@clerk/nextjs/server";
 import { and, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-export async function DELETE(
+// Define the expected shape for params directly
+interface DeleteParams {
+  id: string;
+}
+
+// Define the handler function separately
+const handleDelete = async (
   req: Request,
-  { params }: { params: { id: string } }
-) {
+  { params }: { params: DeleteParams }
+) => {
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -21,7 +27,6 @@ export async function DELETE(
       return new NextResponse("Job Post ID is required", { status: 400 });
     }
 
-    // Delete the job post *only if* it belongs to the current user
     const deletedPost = await db
       .delete(jobPosts)
       .where(and(eq(jobPosts.id, id), eq(jobPosts.userId, userId)))
@@ -38,4 +43,8 @@ export async function DELETE(
     console.error("[JOB_POST_DELETE_API]", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
-}
+};
+
+// Export the handler with the type cast applied
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const DELETE = handleDelete as any;

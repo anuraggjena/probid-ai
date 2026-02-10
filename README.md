@@ -2,6 +2,8 @@
 
 ProbidAI is a sophisticated web application that helps professionals create high-quality proposals using artificial intelligence. Built with Next.js 14, TypeScript, and modern web technologies, it streamlines the proposal creation process and improves bid success rates.
 
+Live Link: https://probid-ai.vercel.app
+
 ## Features
 
 - **AI-Powered Proposal Generation**: Automatically generate professional proposals based on job requirements
